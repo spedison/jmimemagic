@@ -4,9 +4,9 @@ Copyright (C) 2003-2017 David Castro
 */
 package net.sf.jmimemagic;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
@@ -32,39 +32,57 @@ import java.util.Map;
 /**
  * DOCUMENT ME!
  *
- * @author $Author$
- * @version $Revision$
+ * @author David Castro
+ * @version 1.0
   */
 public class MagicParser extends DefaultHandler implements ContentHandler, ErrorHandler
 {
     private static String magicFile = "/magic.xml";
-    private static Log log = LogFactory.getLog(MagicParser.class);
+    private static Logger log = LogManager.getLogger(MagicParser.class);
 
-    // Namespaces feature id (http://xml.org/sax/features/namespaces).
+    /***
+     * Namespaces feature id (http://xml.org/sax/features/namespaces).
+     */
     protected static final String NAMESPACES_FEATURE_ID = "http://xml.org/sax/features/namespaces";
 
-    // Validation feature id (http://xml.org/sax/features/validation). 
+    /***
+     * Validation feature id (http://xml.org/sax/features/validation).
+     */
     protected static final String VALIDATION_FEATURE_ID = "http://xml.org/sax/features/validation";
 
-    // Schema validation feature id (http://apache.org/xml/features/validation/schema). 
+    /***
+     * Schema validation feature id (http://apache.org/xml/features/validation/schema).
+     */
     protected static final String SCHEMA_VALIDATION_FEATURE_ID = "http://apache.org/xml/features/validation/schema";
 
-    // Schema full checking feature id (http://apache.org/xml/features/validation/schema-full-checking). 
+    /***
+     * Schema full checking feature id (http://apache.org/xml/features/validation/schema-full-checking).
+     */
     protected static final String SCHEMA_FULL_CHECKING_FEATURE_ID = "http://apache.org/xml/features/validation/schema-full-checking";
 
-    // Default parser name. 
+    /***
+     * Default parser name.
+     */
     protected static final String DEFAULT_PARSER_NAME = "org.apache.xerces.parsers.SAXParser";
 
-    // Default namespaces support (true). 
+    /***
+     * Default namespaces support (true).
+     */
     protected static final boolean DEFAULT_NAMESPACES = true;
 
-    // Default validation support (false). 
+    /***
+     * Default validation support (false).
+     */
     protected static final boolean DEFAULT_VALIDATION = false;
 
-    // Default Schema validation support (false). 
+    /***
+     * Default Schema validation support (false).
+     */
     protected static final boolean DEFAULT_SCHEMA_VALIDATION = false;
 
-    // Default Schema full checking support (false). 
+    /***
+     * Default Schema full checking support (false).
+     */
     protected static final boolean DEFAULT_SCHEMA_FULL_CHECKING = false;
     private boolean initialized = false;
     private XMLReader parser = null;

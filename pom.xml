@@ -176,8 +176,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.3</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>18</source>
+          <target>18</target>
         </configuration>
       </plugin>
 
@@ -269,16 +269,7 @@
 
   <dependencies>
 
-    <!-- common compile time dependencies -->
-
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.0.4</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
+     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>2.1</version>
@@ -287,12 +278,13 @@
 
     <!-- common runtime only dependencies -->
 
+    <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.8</version>
-      <scope>runtime</scope>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.17.2</version>
     </dependency>
+
 
 
     <!-- common testing only dependencies -->

@@ -4,8 +4,8 @@ Copyright (C) 2003-2017 David Castro
 */
 package net.sf.jmimemagic;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,15 +19,16 @@ import java.util.List;
 import java.util.Map;
 
 
+
 /**
  * This class is the primary class for jMimeMagic
  *
- * @author $Author: arimus $
+ * @author $Author: David Castro
  * @version $Revision: 1.8 $
  */
 public class Magic
 {
-    private static Log log = LogFactory.getLog(Magic.class);
+    private static Logger log = LogManager.getLogger(Magic.class);
     private static boolean initialized = false;
     private static MagicParser magicParser = null;
     private static Map<String,List<MagicMatcher>> hintMap = new HashMap<String, List<MagicMatcher>>();

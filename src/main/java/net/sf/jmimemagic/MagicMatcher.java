@@ -4,8 +4,9 @@ Copyright (C) 2003-2017 David Castro
 */
 package net.sf.jmimemagic;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +30,7 @@ import java.util.regex.Pattern;
  */
 public class MagicMatcher implements Cloneable
 {
-    private static Log log = LogFactory.getLog(MagicMatcher.class);
+    private static Logger log = LogManager.getLogger(MagicMatcher.class);
     private List<MagicMatcher> subMatchers = new ArrayList<MagicMatcher>(0);
     private MagicMatch match = null;
 

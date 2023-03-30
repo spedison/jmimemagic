@@ -4,8 +4,8 @@ Copyright (C) 2003-2017 David Castro
 */
 package net.sf.jmimemagic;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.nio.ByteBuffer;
 
@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public class MagicMatch implements Cloneable
 {
-    private static Log log = LogFactory.getLog(MagicMatch.class);
+    private static Logger log = LogManager.getLogger(MagicMatch.class);
     private String mimeType = null;
     private String extension = null;
     private String description = null;

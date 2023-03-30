@@ -9,8 +9,8 @@ import net.sf.jmimemagic.MagicDetector;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 
@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
   */
 public class TextFileDetector implements MagicDetector
 {
-    private static Log log = LogFactory.getLog(TextFileDetector.class);
+    private static Logger log = LogManager.getLogger(TextFileDetector.class);
 
     /**
      * Creates a new TextFileDetector object.
