@@ -1,6 +1,21 @@
 package net.sf.jmimemagic;
 
 import junit.framework.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.ConfigurationAware;
+import org.apache.logging.log4j.core.config.ConfigurationFactory;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
+import org.apache.logging.log4j.core.config.builder.api.RootLoggerComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
+import org.apache.logging.log4j.core.layout.PatternLayout;
+
 import java.io.File;
 
 public class MagicTest extends TestCase {
@@ -28,24 +43,49 @@ public class MagicTest extends TestCase {
 	private static String wavFile = "test_docs/test.wav";
 	private static String odtFile = "test_docs/test.odt";
 	private static String zipFile = "test_docs/test.zip";
+	private static String txtutf8File = "test_txts/utf-8.txt";
+	private static String txtAsciiFile = "test_txts/ascii.txt";
+
+	private static Logger log = LogManager.getLogger(MagicTest.class);
 
 	public static void main(String args[]) {
 		junit.textui.TestRunner.run(MagicTest.class);
 	}
 
-	// IMAGE TESTS
+	protected void setUp() throws Exception {
+		ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();
 
+		builder.setStatusLevel(Level.DEBUG);
+// naming the logger configuration
+		builder.setConfigurationName("DefaultLogger");
+
+// create a console appender
+		AppenderComponentBuilder appenderBuilder = builder.newAppender("Console", "CONSOLE")
+				.addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
+
+// add a layout like pattern, json etc
+		appenderBuilder.add(builder.newLayout("PatternLayout")
+				.addAttribute("pattern", "%d %p %c [%t] %m%n"));
+		RootLoggerComponentBuilder rootLogger = builder.newRootLogger(Level.DEBUG);
+		rootLogger.add(builder.newAppenderRef("Console"));
+
+		builder.add(appenderBuilder);
+		builder.add(rootLogger);
+		Configurator.reconfigure(builder.build());
+	}
+
+	// IMAGE TESTS
 	public void testGIF() {
-		System.out.print("\ntesting GIF image...");
+		log.debug("testing GIF image...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(gifFile), true, false);
 			if (match != null) {
 				assertEquals("image/gif", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testGIF()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testGIF(). message: " + e);
@@ -56,16 +96,16 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testPNG() {
-		System.out.print("\ntesting PNG image...");
+		log.debug("testing PNG image...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(pngFile), true, false);
 			if (match != null) {
 				assertEquals("image/png", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testPNG()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testPNG(). message: " + e);
@@ -75,17 +115,59 @@ public class MagicTest extends TestCase {
 		}
 	}
 
+	public void testTextUTF8() {
+		log.debug("testing txt utf-8...");
+		try {
+			MagicMatch match = Magic.getMagicMatch(new File(txtutf8File), true, false);
+			if (match != null) {
+				log.debug(match);
+				assertEquals("text/plain", match.getMimeType());
+			} else {
+				log.debug("failed");
+				fail("no match in testPNG()");
+			}
+			log.debug("ok");
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("exception in testTextUTF8(). message: " + e);
+		} catch (Error e) {
+			e.printStackTrace();
+			fail("error in testTextUTF8(). message: " + e.getMessage());
+		}
+	}
+
+	public void testTextAscii() {
+		log.debug("testing txt ascii...");
+		try {
+			MagicMatch match = Magic.getMagicMatch(new File(txtAsciiFile), false, false);
+			if (match != null) {
+				log.debug(match);
+				assertEquals("text/plain - ISO-8859-1", match.getMimeType());
+			} else {
+				log.debug("failed");
+				fail("no match in testPNG()");
+			}
+			log.debug("ok");
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("exception in testTextUTF8(). message: " + e);
+		} catch (Error e) {
+			e.printStackTrace();
+			fail("error in testTextUTF8(). message: " + e.getMessage());
+		}
+	}
+
 	public void testTIF() {
-		System.out.print("\ntesting TIF image...");
+		log.debug("testing TIF image...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(tifFile), true, false);
 			if (match != null) {
 				assertEquals("image/tiff", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testTIF()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testTIF(). message: " + e);
@@ -96,16 +178,16 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testJPEG() {
-		System.out.print("\ntesting JPEG image...");
+		log.debug("testing JPEG image...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(jpgFile), true, false);
 			if (match != null) {
 				assertEquals("image/jpeg", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testJPEG()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testJPEG(). message: " + e);
@@ -118,16 +200,16 @@ public class MagicTest extends TestCase {
 	// DOCUMENT TESTS
 
 	public void testText() {
-		System.out.print("\ntesting Plain Text Document...");
+		log.debug("testing Plain Text Document...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(textFile), true, false);
 			if (match != null) {
 				assertEquals("text/plain", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testText()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testText(). message: " + e);
@@ -138,16 +220,16 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testOfficeOpenXmlDocument() {
-		System.out.print("\ntesting Word Office Open XML Document...");
+		log.debug("testing Word Office Open XML Document...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(officeOpenXmlDocumentFile), true, false);
 			if (match != null) {
 				assertEquals("application/vnd.openxmlformats-officedocument.wordprocessingml.document", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testOfficeOpenXmlDocument()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testOfficeOpenXmlDocument(). message: " + e);
@@ -158,16 +240,16 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testOfficeOpenXmlDocument2() {
-		System.out.print("\ntesting Word Office Open XML Document...");
+		log.debug("testing Word Office Open XML Document...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(officeOpenXmlDocumentFile2), true, false);
 			if (match != null) {
 				assertEquals("application/vnd.openxmlformats-officedocument.wordprocessingml.document", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testOfficeOpenXmlDocument2()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testOfficeOpenXmlDocument2(). message: " + e);
@@ -178,16 +260,16 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testWord2K() {
-		System.out.print("\ntesting Word 2000 Document...");
+		log.debug("testing Word 2000 Document...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(word2KFile), true, false);
 			if (match != null) {
 				assertEquals("application/msword", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testWord2K()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testWord2K(). message: " + e);
@@ -198,16 +280,16 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testWord95() {
-		System.out.print("\ntesting Word 95 Document...");
+		log.debug("testing Word 95 Document...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(word95File), true, false);
 			if (match != null) {
 				assertEquals("application/msword", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testWord95()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testWord95(). message: " + e);
@@ -218,16 +300,16 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testRTF() {
-		System.out.print("\ntesting RTF Document...");
+		log.debug("testing RTF Document...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(rtfFile), true, false);
 			if (match != null) {
 				assertEquals("text/rtf", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testRTF()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testRTF(). message: " + e);
@@ -238,16 +320,16 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testOfficeOpenXmlWorkbook() {
-		System.out.print("\ntesting Word Office Open XML Workbook...");
+		log.debug("testing Word Office Open XML Workbook...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(officeOpenXmlWorkbookFile), true, false);
 			if (match != null) {
 				assertEquals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testOfficeOpenXmlWorkbook()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testOfficeOpenXmlWorkbook(). message: " + e);
@@ -258,16 +340,16 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testOfficeOpenXmlWorkbook2() {
-		System.out.print("\ntesting Word Office Open XML Workbook...");
+		log.debug("testing Word Office Open XML Workbook...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(officeOpenXmlWorkbookFile2), true, false);
 			if (match != null) {
 				assertEquals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testOfficeOpenXmlWorkbook2()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testOfficeOpenXmlWorkbook2(). message: " + e);
@@ -278,16 +360,16 @@ public class MagicTest extends TestCase {
 	}
     
 	public void testExcel2K() {
-		System.out.print("\ntesting Excel 2000 Document...");
+		log.debug("testing Excel 2000 Document...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(excel2KFile), true, false);
 			if (match != null) {
 				assertEquals("application/msword", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testExcel2K()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testExcel2K(). message: " + e);
@@ -299,16 +381,16 @@ public class MagicTest extends TestCase {
 
 
 	public void testOfficeOpenXmlPresentation() {
-		System.out.print("\ntesting Word Office Open XML Presentation...");
+		log.debug("testing Word Office Open XML Presentation...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(officeOpenXmlPresentationFile), true, false);
 			if (match != null) {
 				assertEquals("application/vnd.openxmlformats-officedocument.presentationml.presentation", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testOfficeOpenXmlPresentation()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testOfficeOpenXmlPresentation(). message: " + e);
@@ -319,16 +401,16 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testOfficeOpenXmlPresentation2() {
-		System.out.print("\ntesting Word Office Open XML Presentation...");
+		log.debug("testing Word Office Open XML Presentation...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(officeOpenXmlPresentationFile2), true, false);
 			if (match != null) {
 				assertEquals("application/vnd.openxmlformats-officedocument.presentationml.presentation", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testOfficeOpenXmlPresentation2()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testOfficeOpenXmlPresentation2(). message: " + e);
@@ -341,16 +423,16 @@ public class MagicTest extends TestCase {
 	// OTHER
 
 	public void testPDF() {
-		System.out.print("\ntesting PDF Document...");
+		log.debug("testing PDF Document...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(pdfFile), true, false);
 			if (match != null) {
 				assertEquals("application/pdf", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testPDF()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testPDF(). message: " + e);
@@ -361,16 +443,16 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testPostscript() {
-		System.out.print("\ntesting Postscript Document...");
+		log.debug("testing Postscript Document...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(psFile), true, false);
 			if (match != null) {
 				assertEquals("application/postscript", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testPostscript()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testPostscript(). message: " + e);
@@ -381,16 +463,16 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testJavaClass12() {
-		System.out.print("\ntesting Java Class File (v1.2)...");
+		log.debug("testing Java Class File (v1.2)...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(javaClass12File), true, false);
 			if (match != null) {
 				assertEquals("application/java", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testJavaClass12()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testJavaClass12(). message: " + e);
@@ -401,16 +483,16 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testJavaClass13() {
-		System.out.print("\ntesting Java Class File (v1.3)...");
+		log.debug("testing Java Class File (v1.3)...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(javaClass13File), true, false);
 			if (match != null) {
 				assertEquals("application/java", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testJavaClass13()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testJavaClass13(). message: " + e);
@@ -421,16 +503,16 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testJavaClass14() {
-		System.out.print("\ntesting Java Class File (v1.4)...");
+		log.debug("testing Java Class File (v1.4)...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(javaClass14File), true, false);
 			if (match != null) {
 				assertEquals("application/java", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testJavaClass14()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testJavaClass14(). message: " + e);
@@ -441,16 +523,16 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testMP3() {
-		System.out.print("\ntesting MPEG Layer 3...");
+		log.debug("testing MPEG Layer 3...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(mp3_128_44_jstereoFile), true, false);
 			if (match != null) {
 				assertEquals("audio/mp3", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testMP3()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testMP3(). message: " + e);
@@ -461,19 +543,19 @@ public class MagicTest extends TestCase {
 	}
 
 	public void testWave() {
-		System.out.print("\ntesting WAVE...");
+		log.debug("testing WAVE...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(wavFile), true, false);
 			if (match != null) {
 				assertEquals("RIFF (little-endian) data", match.getDescription());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testWave()");
 			}
 			assertTrue(match.descriptionMatches("Microsoft PCM"));
 			assertTrue(match.descriptionMatches("stereo"));
 			assertTrue(match.mimeTypeMatches("application/x-wav"));
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testWave(). message: " + e);
@@ -483,16 +565,16 @@ public class MagicTest extends TestCase {
 		}
 	}
 	public void testOdt(){
-		System.out.print("\ntesting ODT Document...");
+		log.debug("testing ODT Document...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(odtFile), true, false);
 			if (match != null) {
 				assertEquals("application/vnd.oasis.opendocument.text", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testOdt()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testOdt(). message: " + e);
@@ -504,16 +586,16 @@ public class MagicTest extends TestCase {
 	}
 	
 	public void testZip(){
-		System.out.print("\ntesting Zip File...");
+		log.debug("testing Zip File...");
 		try {
 			MagicMatch match = Magic.getMagicMatch(new File(zipFile), true, false);
 			if (match != null) {
 				assertEquals("application/zip", match.getMimeType());
 			} else {
-				System.out.print("failed");
+				log.debug("failed");
 				fail("no match in testOdt()");
 			}
-			System.out.print("ok");
+			log.debug("ok");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception in testZip(). message: " + e);
@@ -525,13 +607,13 @@ public class MagicTest extends TestCase {
 	}
 	   
     public void testSubMatches(){
-        System.out.print("\ntesting Submatches...");
+        log.debug("testing Submatches...");
         try {
             MagicMatch match = Magic.getMagicMatch(new File(gifFile), true, false);
             Assert.assertEquals(3, match.getSubMatches().size());
             match = Magic.getMagicMatch(new File(gifFile), true, false);
             Assert.assertEquals(3, match.getSubMatches().size());           
-            System.out.print("ok");
+            log.debug("ok");
         } catch (Exception e) {
             e.printStackTrace();
             fail("exception in testSubMatches(). message: " + e);

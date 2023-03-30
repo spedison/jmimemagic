@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -26,6 +27,10 @@ import java.util.regex.Pattern;
   */
 public class TextFileDetector implements MagicDetector
 {
+
+    public static final ByteOrderMark UTF_32LE = new ByteOrderMark("UTF-32LE", new int[]{0xFF, 0xFE, 0, 0});
+    public static final ByteOrderMark UTF_32BE = new ByteOrderMark("UTF-32BE", new int[]{0, 0, 0xFE, 0xFF});
+
     private static Logger log = LogManager.getLogger(TextFileDetector.class);
 
     /**
@@ -73,7 +78,7 @@ public class TextFileDetector implements MagicDetector
      */
     public String[] getHandledTypes()
     {
-        return new String[] { "text/plain" };
+        return new String[] { "text/plain", "text/plain - UTF-8" , "text/plain - UTF-16", "text/plain - UTF-32", "text/plain - ISO-8859-1"};
     }
 
     /**
@@ -106,24 +111,46 @@ public class TextFileDetector implements MagicDetector
 
         BOMInputStream bomIn = null;
         try {
-            bomIn = new BOMInputStream(new ByteArrayInputStream(data), ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE);
-            if (bomIn.hasBOM()) {
-                return new String[] { "text/plain" };
+
+            boolean isIso8859_1 = true;
+            for (int i = 0; i < length; i++) {
+                int b = data[i] & 0xFF;
+                if (b > 0x7F && b < 0xA0) {
+                    isIso8859_1 = false;
+                    break;
+                }
             }
+
+            if (isIso8859_1) {
+                return new String[] { getHandledTypes()[4] };
+            }
+
+            bomIn = new BOMInputStream(new ByteArrayInputStream(data), UTF_32LE, UTF_32BE);
+            if (bomIn.hasBOM()) {
+                return new String[] { getHandledTypes()[3] };
+            }
+
+            bomIn = new BOMInputStream(new ByteArrayInputStream(data), ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE);
+            if (bomIn.hasBOM()) {
+                return new String[] { getHandledTypes()[2] };
+            }
+
+            bomIn = new BOMInputStream(new ByteArrayInputStream(data), ByteOrderMark.UTF_8);
+            if (bomIn.hasBOM()) {
+                return new String[] { getHandledTypes()[1] };
+            }
+
+            String s = new String(data, StandardCharsets.US_ASCII);
+
+            if (!Pattern.matches("/[^[:ascii:][:space:]]/", s)) {
+                return new String[] { getHandledTypes()[0] };
+            }
+
+
         } catch (IOException e) {
             log.error("TextFileDetector: error detecting byte order mark");
         } finally {
         	IOUtils.closeQuietly(bomIn);
-        }
-
-        try {
-            String s = new String(data, "UTF-8");
-
-            if (!Pattern.matches("/[^[:ascii:][:space:]]/", s)) {
-                return new String[] { "text/plain" };
-            }
-        } catch (UnsupportedEncodingException e) {
-            log.error("TextFileDetector: failed to process data");
         }
 
         return null;
